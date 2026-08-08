@@ -1,0 +1,26 @@
+name: Discord Commit
+
+on:
+  workflow_call:
+    secrets:
+      DISCORD_COMMIT_WEBHOOK:
+        description: "Discord webhook used for ASTRA commit notifications"
+        required: true
+
+permissions: {}
+
+jobs:
+  notify:
+    name: Notify ASTRA Discord
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Notify Discord
+        uses: Qbox-project/pipeline-pling@v1
+        with:
+          webhook-url: ${{ secrets.DISCORD_COMMIT_WEBHOOK }}
+          accent-color: "#7c3aed"
+          branch-allowlist: "main"
+          use-sender-avatar: "false"
+          use-repo-username: "false"

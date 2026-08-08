@@ -1,0 +1,163 @@
+name: Publish Release
+
+on:
+  workflow_call:
+    secrets:
+      DISCORD_COMMIT_WEBHOOK:
+        description: "Optional Discord webhook for release notifications"
+        required: false
+      RELEASE_TOKEN:
+        description: "Optional token used to publish the GitHub release"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  release-action:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    env:
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_COMMIT_WEBHOOK }}
+      ASTRA_AVATAR_URL: https://r2.fivemanage.com/TiCSfd5FZCWuiA1OZ1mpC/AstraLogo.png
+      ASTRA_BANNER_URL: https://r2.fivemanage.com/TiCSfd5FZCWuiA1OZ1mpC/AstraBannerDiscord.png
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag context
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" != "tag" ]]; then
+            echo "Publish Release must be called from a tag ref. Current ref: ${GITHUB_REF}"
+            exit 1
+          fi
+
+      - name: Generate changelog
+        id: changelog
+        uses: requarks/changelog-action@v1
+        continue-on-error: true
+        with:
+          token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          includeInvalidCommits: true
+          useGitmojis: false
+          writeToFile: false
+
+      - name: Prepare changelog fallback
+        id: changelog_text
+        env:
+          GENERATED_CHANGELOG: ${{ steps.changelog.outputs.changes }}
+        run: |
+          if [ -n "$GENERATED_CHANGELOG" ]; then
+            {
+              echo "text<<CHANGELOG_EOF_${{ github.run_id }}"
+              printf '%s\n' "$GENERATED_CHANGELOG"
+              echo "CHANGELOG_EOF_${{ github.run_id }}"
+            } >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "text<<CHANGELOG_EOF_${{ github.run_id }}"
+              echo "See the commit history for changes included in this release."
+              echo "CHANGELOG_EOF_${{ github.run_id }}"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bundle resource
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          STAGING_DIR="${RUNNER_TEMP}/${REPO_NAME}"
+          rm -rf "$STAGING_DIR"
+          mkdir -p "$STAGING_DIR"
+
+          rsync -a ./ "$STAGING_DIR/" \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.vscode/' \
+            --exclude='*.zip'
+
+          cd "$RUNNER_TEMP"
+          zip -rq "${GITHUB_WORKSPACE}/${REPO_NAME}.zip" "$REPO_NAME"
+
+      - name: Build release body
+        id: body
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
+          REPO_DESC: ${{ github.event.repository.description }}
+          TAG: ${{ github.ref_name }}
+          CHANGELOG: ${{ steps.changelog_text.outputs.text }}
+          ASTRA_BANNER_URL: ${{ env.ASTRA_BANNER_URL }}
+        run: |
+          {
+            echo "text<<RELEASE_BODY_EOF_${{ github.run_id }}"
+            printf '![ASTRA Framework](%s)\n\n' "$ASTRA_BANNER_URL"
+            printf '# %s %s\n\n' "$REPO_NAME" "$TAG"
+
+            if [ -n "$REPO_DESC" ]; then
+              printf '%s\n\n' "$REPO_DESC"
+            fi
+
+            printf '## Installation\n\n'
+            printf '1. Download `%s.zip` from the assets below.\n' "$REPO_NAME"
+            printf '2. Extract it into your FiveM `resources` folder.\n'
+            printf '3. Add `ensure %s` to your `server.cfg`.\n\n' "$REPO_NAME"
+            printf -- '---\n\n'
+            printf '## Changelog\n\n%s\n\n' "$CHANGELOG"
+            printf -- '---\n\n'
+            printf '![ASTRA Framework](https://img.shields.io/badge/ASTRA-Framework-7c3aed?style=flat-square) '
+            printf '![Built for FiveM](https://img.shields.io/badge/Built_for-FiveM-F40552?style=flat-square)\n'
+            echo "RELEASE_BODY_EOF_${{ github.run_id }}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          allowUpdates: true
+          draft: false
+          makeLatest: true
+          name: ${{ github.ref_name }}
+          tag: ${{ github.ref_name }}
+          body: ${{ steps.body.outputs.text }}
+          artifacts: "${{ github.event.repository.name }}.zip"
+          token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Notify Discord
+        if: ${{ env.DISCORD_WEBHOOK != '' }}
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_URL: ${{ steps.create_release.outputs.html_url }}
+          RELEASE_BODY: ${{ steps.changelog_text.outputs.text }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          DESC=$(printf '**%s**\n\n%s' "$RELEASE_TAG" "$RELEASE_BODY")
+
+          jq -n \
+            --arg username "ASTRA Releases" \
+            --arg avatar "$ASTRA_AVATAR_URL" \
+            --arg title "📦 New ASTRA release — $REPO_NAME" \
+            --arg url "$RELEASE_URL" \
+            --arg desc "$DESC" \
+            --arg thumbnail "$ASTRA_AVATAR_URL" \
+            '{
+              username: $username,
+              avatar_url: $avatar,
+              allowed_mentions: {parse: []},
+              embeds: [{
+                title: $title,
+                url: $url,
+                description: $desc,
+                color: 8141549,
+                thumbnail: {url: $thumbnail}
+              }]
+            }' > discord-payload.json
+
+          curl --fail-with-body --silent --show-error \
+            -H "Content-Type: application/json" \
+            --data @discord-payload.json \
+            "$DISCORD_WEBHOOK"
