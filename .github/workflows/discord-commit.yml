@@ -1,15 +1,13 @@
-name: ASTRA Commit Notifications
+name: ASTRA Discord Commit
 
 on:
-  push:
-    branches:
-      - main
-
-permissions: {}
+  workflow_call:
+    secrets:
+      DISCORD_COMMIT_WEBHOOK:
+        required: true
 
 jobs:
   notify:
-    name: Notify ASTRA Discord
     runs-on: ubuntu-latest
 
     steps:
@@ -18,6 +16,5 @@ jobs:
         with:
           webhook-url: ${{ secrets.DISCORD_COMMIT_WEBHOOK }}
           accent-color: "#7c3aed"
-          branch-allowlist: "main"
           use-sender-avatar: "false"
           use-repo-username: "false"
