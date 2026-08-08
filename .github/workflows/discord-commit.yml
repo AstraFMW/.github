@@ -1,4 +1,4 @@
-name: ASTRA Discord Commit
+name: ASTRA Discord Commits
 
 on:
   workflow_call:
