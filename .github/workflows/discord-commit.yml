@@ -1,18 +1,15 @@
-name: Discord Commit
+name: ASTRA Commit Notifications
 
 on:
-  workflow_call:
-    secrets:
-      DISCORD_COMMIT_WEBHOOK:
-        description: "Discord webhook used for ASTRA commit notifications"
-        required: true
+  push:
+    branches:
+      - main
 
 permissions: {}
 
 jobs:
   notify:
     name: Notify ASTRA Discord
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
