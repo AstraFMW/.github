@@ -17,7 +17,6 @@
 
 <sub>ASTRA Framework is privately developed and maintained for internal use across the ASTRA ecosystem.</sub>
 
-<a href="https://buymeacoffee.com/astraframework"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px !important;width: 180px !important;" /></a>
 
 </div>
 
