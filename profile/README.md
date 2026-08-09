@@ -224,6 +224,6 @@ Individual repositories contain the applicable ASTRA private framework license.
 
 <br/>
 
-<sub>© 2026 astraFMW • All Rights Reserved</sub>
+<sub>© 2026 ASTRA • All Rights Reserved</sub>
 
 </div>
