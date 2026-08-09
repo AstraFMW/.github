@@ -15,7 +15,7 @@
 
 <br/>
 
-<sub>ASTRA Framework is privately developed and maintained for internal use across the ASTRA ecosystem.</sub>
+<sub>ASTRA Framework is privately developed and maintained for internal use across the ASTRA ecosystem. All Repos are privately listed</sub>
 
 
 </div>
