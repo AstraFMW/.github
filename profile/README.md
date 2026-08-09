@@ -131,11 +131,21 @@ ASTRA is a privately developed, full-stack FiveM roleplay framework built specif
 
 <div align="center">
 
-[![Stars](https://img.shields.io/github/stars/AstraFMW/astra_core?style=for-the-badge&logo=github&color=7c3aed&label=STARS)](https://github.com/AstraFMW/astra_core/stargazers)
-[![Forks](https://img.shields.io/github/forks/AstraFMW/astra_core?style=for-the-badge&logo=github&color=7c3aed&label=FORKS)](https://github.com/AstraFMW/astra_core/network/members)
-[![Issues](https://img.shields.io/github/issues/AstraFMW/astra_core?style=for-the-badge&logo=github&color=7c3aed&label=ISSUES)](https://github.com/AstraFMW/astra_core/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/AstraFMW/astra_core?style=for-the-badge&logo=github&color=7c3aed&label=LAST%20COMMIT)](https://github.com/AstraFMW/astra_core/commits)
-[![Top Language](https://img.shields.io/github/languages/top/AstraFMW/astra_core?style=for-the-badge&color=2C2D72&label=TOP%20LANGUAGE)](https://github.com/AstraFMW/astra_core)
+<a href="https://github.com/AstraFMW/astra_core/stargazers">
+  <img src="https://img.shields.io/github/stars/AstraFMW/astra_core?style=for-the-badge&logo=github&color=7c3aed&label=STARS" alt="Stars">
+</a>
+<a href="https://github.com/AstraFMW/astra_core/network/members">
+  <img src="https://img.shields.io/github/forks/AstraFMW/astra_core?style=for-the-badge&logo=github&color=7c3aed&label=FORKS" alt="Forks">
+</a>
+<a href="https://github.com/AstraFMW/astra_core/issues">
+  <img src="https://img.shields.io/github/issues/AstraFMW/astra_core?style=for-the-badge&logo=github&color=7c3aed&label=ISSUES" alt="Issues">
+</a>
+<a href="https://github.com/AstraFMW/astra_core/commits">
+  <img src="https://img.shields.io/github/last-commit/AstraFMW/astra_core?style=for-the-badge&logo=github&color=7c3aed&label=LAST%20COMMIT" alt="Last Commit">
+</a>
+<a href="https://github.com/AstraFMW/astra_core">
+  <img src="https://img.shields.io/github/languages/top/AstraFMW/astra_core?style=for-the-badge&color=2C2D72&label=TOP%20LANGUAGE" alt="Top Language">
+</a>
 
 </div>
 
